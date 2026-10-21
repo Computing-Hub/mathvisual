@@ -387,7 +387,7 @@ const PRESETS=[
 let S,origS,hist,acts,solved,activePreset=0,mode='watch';
 
 function rn(v){return Math.round(v*1e4)/1e4}
-function sStr(xc,cc){let p=[];if(xc){if(xc===1)p.push('x');else if(xc===-1)p.push('\u2212x');else p.push((xc<0?'\u2212':'')+Math.abs(xc)+'x')}if(cc||!p.length){if(p.length&&cc>0)p.push('+ '+cc);else if(p.length&&cc<0)p.push('\u2212 '+Math.abs(cc));else p.push(''+cc)}return p.join(' ')}
+function sStr(xc,cc){let p=[];if(xc){if(xc===1)p.push('x');else if(xc===-1)p.push('\u2212x');else p.push((xc<0?'\u2212':'')+Math.abs(xc)+'x')}if(cc||!p.length){if(p.length&&cc>0)p.push('+ '+cc);else if(p.length&&cc<0)p.push('\u2212 '+Math.abs(cc));else p.push(cc<0?'\u2212'+Math.abs(cc):''+cc)}return p.join(' ')}
 function eqStr(s){return sStr(s.lx,s.lc)+' = '+sStr(s.rx,s.rc)}
 
 function buildPresets(){
@@ -395,12 +395,47 @@ function buildPresets(){
   document.getElementById('presets').innerHTML=h;
 }
 
+/* Blocks for one side: one block per x and per 1, stacked in rows of up to
+   4, so a student can count them. Decimals, and more units than fit, are
+   shown as one labelled block instead (e.g. "11" or "1.5"), so nothing is
+   ever dropped. */
+const BW=34,BH=30,BGAP=4,MAXROWS=4;
+function sideBlocks(xc,cc,W){
+  const perRow=Math.floor((W+BGAP)/(BW+BGAP));
+  const groupX=!Number.isInteger(xc)||Math.abs(xc)>perRow*2;
+  let groupC=!Number.isInteger(cc);
+  const xUnits=groupX?(xc?1:0):Math.abs(xc);
+  if(xUnits+(groupC?(cc?1:0):Math.abs(cc))>perRow*MAXROWS)groupC=true;
+  const wide=label=>Math.max(BW,label.length*10+16);
+  const L=[];
+  if(xc){
+    if(groupX){const label=sStr(xc,0);L.push({type:'x',neg:xc<0,label,w:wide(label)})}
+    else for(let i=0;i<Math.abs(xc);i++)L.push({type:'x',neg:xc<0,label:xc<0?'−x':'x',w:BW});
+  }
+  if(cc){
+    if(groupC){const label=(cc<0?'−':'')+rn(Math.abs(cc));L.push({type:'num',neg:cc<0,label,w:wide(label)})}
+    else for(let i=0;i<Math.abs(cc);i++)L.push({type:'num',neg:cc<0,label:cc<0?'−1':'1',w:BW});
+  }
+  return L;
+}
+function drawBlocks(xc,cc,x0,W,baseY){
+  let o='',x=x0,y=baseY;
+  sideBlocks(xc,cc,W).forEach(b=>{
+    if(x+b.w>x0+W+0.5&&x>x0){x=x0;y-=BH+BGAP}
+    const col=b.type==='x'?{f:COL.brandL,s:COL.brand,t:COL.brandD}:b.neg?{f:COL.neg,s:COL.negS,t:COL.negC}:{f:COL.pos,s:COL.posS,t:COL.posC};
+    o+='<rect x="'+x+'" y="'+(y-BH)+'" width="'+b.w+'" height="'+BH+'" rx="6" fill="'+col.f+'" stroke="'+col.s+'" stroke-width="2"/>';
+    o+='<text x="'+(x+b.w/2)+'" y="'+(y-BH/2+1)+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="'+col.t+'" font-family="system-ui">'+b.label+'</text>';
+    x+=b.w+BGAP;
+  });
+  return o;
+}
+
 function drawScale(){
   const s=S,svg=document.getElementById('scaleSvg');
   const W=700,H=260,cx=350,baseY=240,beamY=180,beamW=520;
   const lx=cx-beamW/2,rx=cx+beamW/2;
   // pans hang at same height - ALWAYS LEVEL
-  const panY=beamY+16,panW=180,panH=80;
+  const panY=beamY+16,panW=220,panH=80;
 
   let o='';
   // fulcrum
@@ -420,39 +455,13 @@ function drawScale(){
   o+='<rect x="'+(rx-panW-10)+'" y="'+panY+'" width="'+panW+'" height="5" rx="2.5" fill="'+COL.teal+'"/>';
 
   // blocks on LEFT
-  let bx=lx+14,by=panY-6;
-  const lBlocks=[];
-  for(let i=0;i<Math.abs(s.lx);i++)lBlocks.push({type:'x',neg:s.lx<0});
-  if(s.lc>0)for(let i=0;i<Math.min(s.lc,8);i++)lBlocks.push({type:'num',val:s.lc>8&&i===7?s.lc:1,neg:false});
-  if(s.lc<0)for(let i=0;i<Math.min(Math.abs(s.lc),8);i++)lBlocks.push({type:'num',val:Math.abs(s.lc)>8&&i===7?s.lc:s.lc,neg:true});
-
-  lBlocks.forEach((b,i)=>{
-    const bw=40,bh=36,gap=4;
-    const col=b.type==='x'?{f:COL.brandL,s:COL.brand,t:COL.brandD}:b.neg?{f:COL.neg,s:COL.negS,t:COL.negC}:{f:COL.pos,s:COL.posS,t:COL.posC};
-    const x2=bx+i*(bw+gap);if(x2+bw>lx+panW+10)return;
-    o+='<rect x="'+x2+'" y="'+(by-bh)+'" width="'+bw+'" height="'+bh+'" rx="6" fill="'+col.f+'" stroke="'+col.s+'" stroke-width="2"/>';
-    const label=b.type==='x'?(b.neg?'\u2212x':'x'):(typeof b.val==='number'&&Math.abs(b.val)>1?b.val:''+b.val);
-    o+='<text x="'+(x2+bw/2)+'" y="'+(by-bh/2+1)+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="'+col.t+'" font-family="system-ui">'+(b.type==='x'?'x':label)+'</text>';
-  });
+  o+=drawBlocks(s.lx,s.lc,lx+12,panW-4,panY-6);
   // left label
   o+='<text x="'+(lx+panW/2+10)+'" y="'+(panY+22)+'" text-anchor="middle" font-size="18" font-weight="700" fill="'+COL.brand+'" font-family="system-ui">'+sStr(s.lx,s.lc)+'</text>';
   o+='<text x="'+(lx+panW/2+10)+'" y="'+(panY+38)+'" text-anchor="middle" font-size="11" font-weight="600" fill="'+COL.txtM+'" font-family="system-ui" text-transform="uppercase" letter-spacing="1">LEFT SIDE</text>';
 
   // blocks on RIGHT
-  bx=rx-panW-6;
-  const rBlocks=[];
-  for(let i=0;i<Math.abs(s.rx);i++)rBlocks.push({type:'x',neg:s.rx<0});
-  if(s.rc>0)for(let i=0;i<Math.min(s.rc,8);i++)rBlocks.push({type:'num',val:s.rc>8&&i===7?s.rc:1,neg:false});
-  if(s.rc<0)for(let i=0;i<Math.min(Math.abs(s.rc),8);i++)rBlocks.push({type:'num',val:Math.abs(s.rc)>8&&i===7?s.rc:s.rc,neg:true});
-
-  rBlocks.forEach((b,i)=>{
-    const bw=40,bh=36,gap=4;
-    const col=b.type==='x'?{f:COL.brandL,s:COL.brand,t:COL.brandD}:b.neg?{f:COL.neg,s:COL.negS,t:COL.negC}:{f:COL.pos,s:COL.posS,t:COL.posC};
-    const x2=bx+i*(bw+gap);if(x2+bw>rx-6)return;
-    o+='<rect x="'+x2+'" y="'+(by-bh)+'" width="'+bw+'" height="'+bh+'" rx="6" fill="'+col.f+'" stroke="'+col.s+'" stroke-width="2"/>';
-    const label=b.type==='x'?(b.neg?'\u2212x':'x'):(typeof b.val==='number'&&Math.abs(b.val)>1?b.val:''+b.val);
-    o+='<text x="'+(x2+bw/2)+'" y="'+(by-bh/2+1)+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="'+col.t+'" font-family="system-ui">'+(b.type==='x'?'x':label)+'</text>';
-  });
+  o+=drawBlocks(s.rx,s.rc,rx-panW-8,panW-4,panY-6);
   // right label
   o+='<text x="'+(rx-panW/2-10)+'" y="'+(panY+22)+'" text-anchor="middle" font-size="18" font-weight="700" fill="'+COL.teal+'" font-family="system-ui">'+sStr(s.rx,s.rc)+'</text>';
   o+='<text x="'+(rx-panW/2-10)+'" y="'+(panY+38)+'" text-anchor="middle" font-size="11" font-weight="600" fill="'+COL.txtM+'" font-family="system-ui" text-transform="uppercase" letter-spacing="1">RIGHT SIDE</text>';
