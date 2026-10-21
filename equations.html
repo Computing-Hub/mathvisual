@@ -273,10 +273,36 @@ canvas, svg { display: block; }
 .custom-panel{padding:14px;background:var(--surface);border-radius:var(--radius);margin:12px 0}
 .custom-title{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;cursor:pointer}
 .step-explain{text-align:center;font-size:16px;font-weight:600;color:var(--text-secondary);padding:8px;margin:4px 0;min-height:30px}
+[hidden]{display:none!important}
+.mode-row{justify-content:center}
+.mode-btn{font-size:15px;font-weight:700;padding:9px 18px}
+.mode-help{text-align:center;font-size:14px;color:var(--text-secondary);margin:-6px 0 14px}
+.op-panel{padding:16px;background:var(--surface);border-radius:var(--radius);margin:8px 0}
+.op-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;text-align:center}
+.op-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center}
+.op-btn{font-size:16px;font-weight:700;padding:10px 14px;border-radius:var(--radius-sm);border:2px solid var(--border-strong)}
+.op-btn.active{background:var(--brand-light);color:var(--brand);border-color:var(--brand)}
+.op-num{width:72px;font-size:20px}
+.op-kind{display:inline-flex;border:2px solid var(--border-strong);border-radius:var(--radius-sm);overflow:hidden}
+.op-kind button{border:0;border-radius:0;font-size:15px;font-weight:700;padding:8px 12px}
+.op-kind button.active{background:var(--brand);color:#fff}
+.op-preview{text-align:center;font-size:18px;font-weight:700;margin:12px 0 0;color:var(--brand)}
+.move-feedback{text-align:center;padding:12px 16px;border-radius:var(--radius-sm);margin:8px 0;font-size:16px;font-weight:600}
+.move-feedback:empty{display:none}
+.move-feedback.good{background:var(--green-light);color:var(--green)}
+.move-feedback.meh{background:var(--amber-light);color:var(--amber)}
+.move-feedback.bad{background:#fee2e2;color:#991b1b}
+@media (prefers-color-scheme: dark){.move-feedback.bad{background:#450a0a;color:#fca5a5}}
 </style></head><body>
 <nav class="site-nav"><a href="index.html" class="nav-home"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7M5 8.5V16h4v-4h2v4h4V8.5"/></svg> VisualMaths</a><span class="nav-sep">/</span><span class="nav-title">Linear equations</span></nav>
 <div class="tool-page"><div class="tool-header"><h1>Linear equations</h1><p>Solve equations step-by-step. Whatever you do to one side, you must do to the other — the balance stays level!</p></div>
 <div class="tool-body">
+
+<div class="mode-row" role="tablist" aria-label="How to solve">
+  <button class="mode-btn active" id="modeWatch" role="tab" aria-selected="true" onclick="setMode('watch')">Watch the steps</button>
+  <button class="mode-btn" id="modePractice" role="tab" aria-selected="false" onclick="setMode('practice')">Solve it yourself</button>
+</div>
+<p class="mode-help" id="modeHelp"></p>
 
 <div class="preset-grid" id="presets"></div>
 <div class="eq-display" id="eqDisplay"></div>
@@ -287,16 +313,39 @@ canvas, svg { display: block; }
 
 <div class="step-explain" id="stepExplain"></div>
 
-<div class="btn-row">
+<div class="btn-row" id="watchControls">
   <button class="btn-big btn-primary" onclick="nextStep()">&#9654; Next step</button>
   <button class="btn-big btn-outline" onclick="showHint()">Hint</button>
   <button class="btn-big btn-amber" onclick="solveAll()">Solve all</button>
 </div>
 
+<div class="op-panel" id="practiceControls" hidden>
+  <div class="op-title">Do this to both sides</div>
+  <div class="op-row" role="group" aria-label="Operation">
+    <button class="op-btn" data-op="add" onclick="setOp('add')">+ Add</button>
+    <button class="op-btn active" data-op="sub" onclick="setOp('sub')">&minus; Subtract</button>
+    <button class="op-btn" data-op="mul" onclick="setOp('mul')">&times; Multiply by</button>
+    <button class="op-btn" data-op="div" onclick="setOp('div')">&divide; Divide by</button>
+  </div>
+  <div class="op-row" style="margin-top:10px">
+    <input class="num-input op-num" id="opNum" type="number" step="any" value="1" aria-label="Number" oninput="updateOpPreview()">
+    <div class="op-kind" id="opKind" role="group" aria-label="A number or x">
+      <button class="active" data-kind="num" onclick="setKind('num')">number</button>
+      <button data-kind="x" onclick="setKind('x')">x</button>
+    </div>
+  </div>
+  <div class="op-preview" id="opPreview"></div>
+  <div class="btn-row">
+    <button class="btn-big btn-primary" id="applyBtn" onclick="applyOp()">Do it to both sides</button>
+    <button class="btn-big btn-outline" onclick="showHint()">Hint</button>
+  </div>
+</div>
+
+<div class="move-feedback" id="moveFeedback" role="status" aria-live="polite"></div>
 <div class="hint-box" id="hintBox"></div>
 
 <details style="margin:12px 0">
-  <summary style="font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary)">&#9654; Try it myself...</summary>
+  <summary style="font-size:14px;font-weight:700;cursor:pointer;color:var(--text-secondary)">&#9654; Use your own equation...</summary>
   <div class="custom-panel" style="margin-top:8px">
     <div class="row" style="gap:6px;flex-wrap:wrap">
       <input class="num-input" id="ea" type="number" value="2" style="width:48px"><span style="font-style:italic;font-weight:700;font-size:18px">x</span><span class="sym">+</span>
@@ -332,13 +381,13 @@ const PRESETS=[
   {a:3,b:5,c:2,d:14,label:'3x + 5 = 2x + 14'},
   {a:4,b:-1,c:2,d:7,label:'4x \u2212 1 = 2x + 7'},
   {a:6,b:0,c:0,d:24,label:'6x = 24'},
-  {a:10,b:0,c:1,d:4,label:'10 \u2212 x = 4'},
+  {a:-1,b:10,c:0,d:4,label:'10 \u2212 x = 4'},
 ];
 
-let S,origS,hist,solved,activePreset=0;
+let S,origS,hist,acts,solved,activePreset=0,mode='watch';
 
 function rn(v){return Math.round(v*1e4)/1e4}
-function sStr(xc,cc){let p=[];if(xc){if(xc===1)p.push('x');else if(xc===-1)p.push('\u2212x');else p.push(xc+'x')}if(cc||!p.length){if(p.length&&cc>0)p.push('+ '+cc);else if(p.length&&cc<0)p.push('\u2212 '+Math.abs(cc));else p.push(''+cc)}return p.join(' ')}
+function sStr(xc,cc){let p=[];if(xc){if(xc===1)p.push('x');else if(xc===-1)p.push('\u2212x');else p.push((xc<0?'\u2212':'')+Math.abs(xc)+'x')}if(cc||!p.length){if(p.length&&cc>0)p.push('+ '+cc);else if(p.length&&cc<0)p.push('\u2212 '+Math.abs(cc));else p.push(''+cc)}return p.join(' ')}
 function eqStr(s){return sStr(s.lx,s.lc)+' = '+sStr(s.rx,s.rc)}
 
 function buildPresets(){
@@ -429,7 +478,7 @@ function getNextAction(){
 function nextStep(){
   if(solved)return;
   const act=getNextAction();if(!act)return;
-  hist.push({...S});
+  hist.push({...S});acts.push(act.desc);
   act.fn();
   document.getElementById('stepExplain').textContent=act.desc;
   document.getElementById('hintBox').style.display='none';
@@ -441,7 +490,7 @@ function showHint(){
   hb.textContent=act.hint;hb.style.display='block';
 }
 function solveAll(){
-  while(!solved){const act=getNextAction();if(!act)break;hist.push({...S});act.fn();checkSolved();}render();
+  while(!solved){const act=getNextAction();if(!act)break;hist.push({...S});acts.push(act.desc);act.fn();checkSolved();}render();
 }
 
 function checkSolved(){
@@ -457,7 +506,8 @@ function render(){
   
   if(checkSolved()){
     const val=s.lx===1?s.rc:s.lc;
-    document.getElementById('resultBanner').innerHTML='<div class="result-banner solved"><div class="result-label">Solution found!</div><div class="result-value">x = '+rn(val)+'</div></div>';
+    const label=mode==='practice'?'You solved it in '+hist.length+' move'+(hist.length===1?'':'s')+'!':'Solution found!';
+    document.getElementById('resultBanner').innerHTML='<div class="result-banner solved"><div class="result-label">'+label+'</div><div class="result-value">x = '+rn(val)+'</div></div>';
     document.getElementById('stepExplain').textContent='Done! x equals '+rn(val);
   } else {
     document.getElementById('resultBanner').innerHTML='';
@@ -470,17 +520,17 @@ function renderHistory(){
   const all=[...hist.map(s=>({...s}))];
   all.push({...S});
   all.forEach((s,i)=>{
-    h+='<div class="history-step"><div class="history-num">'+(i+1)+'</div><div class="history-eq">'+eqStr(s)+'</div><div class="history-action">'+(i===0?'Start':'Step '+i)+'</div></div>';
+    h+='<div class="history-step"><div class="history-num">'+(i+1)+'</div><div class="history-eq">'+eqStr(s)+'</div><div class="history-action">'+(i===0?'Start':acts[i-1])+'</div></div>';
   });
   document.getElementById('history').innerHTML=h;
 }
 
-function undo(){if(hist.length<1)return;S=hist.pop();solved=false;document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';render()}
-function resetEq(){S={...origS};hist=[];solved=false;document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';render()}
+function undo(){if(hist.length<1)return;S=hist.pop();acts.pop();solved=false;setFeedback('');document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';render()}
+function resetEq(){S={...origS};hist=[];acts=[];solved=false;setFeedback('');document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';render()}
 
 function loadPreset(i){
   activePreset=i;const p=PRESETS[i];
-  S={lx:p.a,lc:p.b,rx:p.c,rc:p.d};origS={...S};hist=[];solved=false;
+  S={lx:p.a,lc:p.b,rx:p.c,rc:p.d};origS={...S};hist=[];acts=[];solved=false;setFeedback('');
   document.getElementById('ea').value=p.a;document.getElementById('eb').value=p.b;
   document.getElementById('ec').value=p.c;document.getElementById('ed').value=p.d;
   document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';
@@ -489,10 +539,98 @@ function loadPreset(i){
 function loadFromInputs(){
   const a=parseFloat(document.getElementById('ea').value)||0,b=parseFloat(document.getElementById('eb').value)||0;
   const c=parseFloat(document.getElementById('ec').value)||0,d=parseFloat(document.getElementById('ed').value)||0;
-  activePreset=-1;S={lx:a,lc:b,rx:c,rc:d};origS={...S};hist=[];solved=false;
+  activePreset=-1;S={lx:a,lc:b,rx:c,rc:d};origS={...S};hist=[];acts=[];solved=false;setFeedback('');
   document.getElementById('resultBanner').innerHTML='';document.getElementById('stepExplain').textContent='';document.getElementById('hintBox').style.display='none';
   buildPresets();render();
 }
 
-buildPresets();loadPreset(0);
+/* ---------- Solve it yourself ----------
+   The student picks an operation; it is applied to both sides, so the scale
+   stays level. We then compare how many moves are left (using the same
+   step-by-step solver as "Watch the steps") to say whether it helped. */
+let op='sub',kind='num';
+
+function isSolvedState(s){return (s.lx===1&&s.rx===0&&s.lc===0)||(s.rx===1&&s.lx===0&&s.rc===0)}
+
+// Moves the step-by-step solver needs from state s (Infinity if x is gone)
+function movesLeft(s){
+  const saved=S;S={...s};let n=0;
+  while(!isSolvedState(S)&&n<10){const a=getNextAction();if(!a){n=Infinity;break}a.fn();n++}
+  S=saved;return n;
+}
+
+const fmt=v=>String(rn(Math.abs(v)));
+function opText(){
+  const k=parseFloat(document.getElementById('opNum').value);
+  if(!isFinite(k))return '';
+  const term=kind==='x'&&(op==='add'||op==='sub')?(Math.abs(k)===1?'x':fmt(k)+'x'):fmt(k);
+  const t=(k<0&&(op==='add'||op==='sub'))?'('+(k<0?'−':'')+term+')':(k<0?'−'+term:term);
+  return {add:'Add '+t+' to both sides',sub:'Subtract '+t+' from both sides',mul:'Multiply both sides by '+t,div:'Divide both sides by '+t}[op];
+}
+function updateOpPreview(){document.getElementById('opPreview').textContent=opText()}
+
+function setOp(o){
+  op=o;
+  document.querySelectorAll('.op-btn').forEach(b=>b.classList.toggle('active',b.dataset.op===o));
+  // Only adding or subtracting can use x terms
+  const kinds=document.getElementById('opKind');kinds.hidden=!(o==='add'||o==='sub');
+  if(kinds.hidden)setKind('num');
+  updateOpPreview();
+}
+function setKind(k){
+  kind=k;
+  document.querySelectorAll('#opKind button').forEach(b=>b.classList.toggle('active',b.dataset.kind===k));
+  updateOpPreview();
+}
+
+function setFeedback(text,cls){
+  const f=document.getElementById('moveFeedback');f.textContent=text;f.className='move-feedback'+(cls?' '+cls:'');
+}
+
+function applyOp(){
+  if(solved)return;
+  const k=parseFloat(document.getElementById('opNum').value);
+  if(!isFinite(k)){setFeedback('Type a number first.','meh');return}
+  if(k===0&&(op==='add'||op==='sub')){setFeedback(op==='add'?'Adding 0 changes nothing. Pick another number.':'Subtracting 0 changes nothing. Pick another number.','meh');return}
+  if(k===0&&op==='mul'){setFeedback('Multiplying by 0 makes both sides 0, and the x disappears. Pick another number.','bad');return}
+  if(k===0&&op==='div'){setFeedback('You can’t divide by 0. Pick another number.','bad');return}
+
+  const before=movesLeft(S),desc=opText();
+  hist.push({...S});acts.push(desc);
+  if(op==='add'||op==='sub'){
+    const d=op==='add'?k:-k;
+    if(kind==='x'){S.lx=rn(S.lx+d);S.rx=rn(S.rx+d)}else{S.lc=rn(S.lc+d);S.rc=rn(S.rc+d)}
+  }else{
+    const f=op==='mul'?k:1/k;
+    S.lx=rn(S.lx*f);S.lc=rn(S.lc*f);S.rx=rn(S.rx*f);S.rc=rn(S.rc*f);
+  }
+  document.getElementById('hintBox').style.display='none';
+  document.getElementById('stepExplain').textContent=desc;
+  render();
+
+  if(solved){setFeedback('✓ Great move! x is on its own, so the equation is solved.','good');return}
+  const after=movesLeft(S);
+  if(S.lx===0&&S.rx===0)setFeedback('Both sides are still equal, but the x has gone from both sides! Press Undo and try another move.','bad');
+  else if(after<before)setFeedback('✓ Good move! That got you closer to x on its own.','good');
+  else if(after===before)setFeedback('The balance is still level, but that didn’t get you any closer. Try a different move, or press Undo.','meh');
+  else setFeedback('Still balanced, but the equation is now harder to solve. Press Undo and try another move.','bad');
+}
+
+const MODE_HELP={
+  watch:'Press Next step to see each move. Try to guess the move first, then press Hint to check.',
+  practice:'You choose each move. Pick what to do, type a number and press Do it to both sides. Keep going until x is on its own.'
+};
+function setMode(m){
+  mode=m;
+  document.getElementById('modeWatch').classList.toggle('active',m==='watch');
+  document.getElementById('modePractice').classList.toggle('active',m==='practice');
+  document.getElementById('modeWatch').setAttribute('aria-selected',m==='watch');
+  document.getElementById('modePractice').setAttribute('aria-selected',m==='practice');
+  document.getElementById('watchControls').hidden=m!=='watch';
+  document.getElementById('practiceControls').hidden=m!=='practice';
+  document.getElementById('modeHelp').textContent=MODE_HELP[m];
+  resetEq();
+}
+
+buildPresets();loadPreset(0);setMode('watch');setOp('sub');
 </script></body></html>
