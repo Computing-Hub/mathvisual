@@ -1,0 +1,463 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Angle rules — VisualMaths</title><style>
+@import url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
+
+:root {
+  --brand: #4338ca;
+  --brand-light: #e8e6fc;
+  --brand-dark: #312e81;
+  --teal: #0f766e;
+  --teal-light: #d5f5f0;
+  --amber: #b45309;
+  --amber-light: #fef3c7;
+  --coral: #c2410c;
+  --coral-light: #fff1e6;
+  --pink: #be185d;
+  --pink-light: #fce7f3;
+  --green: #15803d;
+  --green-light: #dcfce7;
+  --surface: #fafaf9;
+  --card: #ffffff;
+  --text: #1c1917;
+  --text-secondary: #78716c;
+  --text-tertiary: #a8a29e;
+  --border: #e7e5e4;
+  --border-strong: #d6d3d1;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: #818cf8;
+    --brand-light: #1e1b4b;
+    --brand-dark: #c7d2fe;
+    --teal: #5eead4;
+    --teal-light: #042f2e;
+    --amber: #fbbf24;
+    --amber-light: #422006;
+    --coral: #fb923c;
+    --coral-light: #431407;
+    --pink: #f472b6;
+    --pink-light: #500724;
+    --green: #4ade80;
+    --green-light: #052e16;
+    --surface: #0c0a09;
+    --card: #1c1917;
+    --text: #fafaf9;
+    --text-secondary: #a8a29e;
+    --text-tertiary: #78716c;
+    --border: #292524;
+    --border-strong: #44403c;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-home {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+}
+.nav-home svg { width: 20px; height: 20px; }
+.nav-sep { color: var(--text-tertiary); font-size: 14px; }
+.nav-title { font-size: 15px; color: var(--text-secondary); font-weight: 500; }
+
+/* TOOL PAGE LAYOUT */
+.tool-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+.tool-header {
+  margin-bottom: 24px;
+}
+.tool-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.tool-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.tool-body {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* COMMON WIDGET STYLES */
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.num-input {
+  width: 56px; font-size: 17px; font-weight: 600; text-align: center; padding: 6px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--card); color: var(--text);
+}
+.num-input:focus { outline: 2px solid var(--brand); outline-offset: -1px; border-color: var(--brand); }
+.sym { font-size: 20px; font-weight: 600; color: var(--text-secondary); }
+select {
+  font-size: 14px; padding: 6px 10px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--card); color: var(--text);
+}
+button {
+  font-size: 13px; font-weight: 500; padding: 7px 16px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--card); color: var(--text); cursor: pointer;
+  transition: background 0.15s;
+}
+button:hover { background: var(--surface); }
+button.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+button.primary:hover { opacity: 0.9; }
+
+.step-card {
+  background: var(--surface); border-radius: var(--radius-sm); padding: 12px 16px; margin: 8px 0;
+}
+.step-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.step-math { font-size: 16px; font-weight: 600; }
+.result-box {
+  text-align: center; font-size: 20px; font-weight: 700; padding: 14px;
+  background: var(--surface); border-radius: var(--radius-sm); margin: 12px 0;
+}
+.result-box.ok { color: var(--green); background: var(--green-light); }
+.hint { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+
+.bar-outer {
+  height: 38px; border-radius: 6px; overflow: hidden; display: flex;
+  border: 1px solid var(--border-strong);
+}
+.bar-seg { height: 100%; border-right: 1px solid rgba(0,0,0,0.08); }
+.bar-seg:last-child { border-right: none; }
+
+.mode-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.mode-btn { font-size: 13px; padding: 6px 14px; }
+.mode-btn.active { background: var(--brand-light); color: var(--brand); border-color: var(--brand); }
+
+/* WEIGHT BLOCKS (seesaw) */
+.wb {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; height: 32px; padding: 0 8px; border-radius: 6px;
+  font-size: 13px; font-weight: 600; cursor: grab; touch-action: none;
+}
+.wb:active { cursor: grabbing; }
+.w1 { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.w2 { background: var(--brand-light); color: var(--brand-dark); border: 1px solid #a5b4fc; }
+.w5 { background: var(--amber-light); color: var(--amber); border: 1px solid #fcd34d; }
+.w10 { background: var(--coral-light); color: var(--coral); border: 1px solid #fdba74; }
+.wx { background: var(--pink-light); color: var(--pink); border: 1px solid #f9a8d4; font-style: italic; }
+.wn { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+/* GRID TABLE */
+.g-table { border-collapse: collapse; }
+.g-table td, .g-table th { padding: 10px 16px; text-align: center; font-size: 15px; }
+.g-table th { font-weight: 600; color: var(--text-secondary); }
+
+/* CANVAS / SVG */
+canvas, svg { display: block; }
+
+/* HOMEPAGE */
+.home-hero {
+  text-align: center;
+  padding: 48px 20px 36px;
+}
+.home-hero h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+.home-hero p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.topic-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+}
+.card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700;
+}
+.card-title { font-size: 15px; font-weight: 600; }
+.card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.card-tag {
+  display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 4px; background: var(--surface); color: var(--text-tertiary);
+  align-self: flex-start; margin-top: auto;
+}
+
+.section-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text-tertiary); padding: 0 20px; max-width: 960px; margin: 24px auto 8px;
+}
+
+[hidden] { display: none !important; }
+</style></head><body><nav class="site-nav"><a href="index.html" class="nav-home"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7M5 8.5V16h4v-4h2v4h4V8.5"/></svg> VisualMaths</a><span class="nav-sep">/</span><span class="nav-title">Angle rules</span></nav><div class="tool-page"><div class="tool-header"><h1>Angle rules</h1><p>Drag the orange dots to change the angles. Watch the numbers change, and see which total never changes. That total is the rule.</p></div><div class="tool-body"><div class="mode-row" style="flex-wrap:wrap">
+<button class="mode-btn active" data-m="0" onclick="setRule(0)">Complementary</button>
+<button class="mode-btn" data-m="1" onclick="setRule(1)">Supplementary</button>
+<button class="mode-btn" data-m="2" onclick="setRule(2)">Straight line</button>
+<button class="mode-btn" data-m="3" onclick="setRule(3)">Vertically opposite</button>
+<button class="mode-btn" data-m="4" onclick="setRule(4)">Triangle</button>
+<button class="mode-btn" data-m="5" onclick="setRule(5)">Quadrilateral</button>
+<button class="mode-btn" data-m="6" onclick="setRule(6)">Parallel lines</button>
+</div>
+<div class="mode-row" id="pairRow" style="flex-wrap:wrap" hidden>
+<span class="hint" style="margin:0 4px 0 0;align-self:center">Show:</span>
+<button class="mode-btn active" data-p="0" onclick="setPair(0)">Corresponding (F)</button>
+<button class="mode-btn" data-p="1" onclick="setPair(1)">Alternate (Z)</button>
+<button class="mode-btn" data-p="2" onclick="setPair(2)">Co-interior (C)</button>
+</div>
+<canvas id="cv" width="500" height="420" style="width:100%;cursor:grab;touch-action:none" aria-label="Angle diagram. Drag the orange dots."></canvas>
+<div id="info" class="step-card" style="margin-top:8px"></div>
+<div id="rule" class="result-box ok"></div>
+<p class="hint" id="note"></p>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const dark=matchMedia('(prefers-color-scheme:dark)').matches;
+const W=500,H=420;
+const C1=dark?'#818cf8':'#4338ca',C2=dark?'#5eead4':'#0f766e',C3=dark?'#f472b6':'#be185d',HANDLE=dark?'#fb923c':'#c2410c',
+  LINE=dark?'#a8a29e':'#57534e',FAINT=dark?'#44403c':'#d6d3d1',TXT=dark?'#fafaf9':'#1c1917',BG=dark?'#1c1917':'#fff';
+const ARC=[C1,C2,C3,dark?'#fbbf24':'#b45309'];
+const RAD=Math.PI/180;
+
+const RULES=[
+  'Complementary angles add up to 90°.',
+  'Supplementary angles add up to 180°.',
+  'Angles on a straight line add up to 180°.',
+  'Vertically opposite angles are equal.',
+  'The angles in a triangle add up to 180°.',
+  'The angles in a quadrilateral add up to 360°.',
+  ''
+];
+const PAIR_RULES=[
+  'Corresponding angles are equal (look for an F shape).',
+  'Alternate angles are equal (look for a Z shape).',
+  'Co-interior angles add up to 180° (look for a C shape).'
+];
+
+let rule=0,pair=0,st,drag=null;
+
+function initState(){
+  st=[
+    {o:[140,330],t:35},                 // complementary: ray at t degrees
+    {o:[250,300],t:60},                 // supplementary
+    {o:[250,300],t1:50,t2:120},         // straight line: two rays
+    {o:[250,220],t:55},                 // vertically opposite: second line at t
+    {p:[[100,330],[400,330],[220,90]]}, // triangle corners
+    {p:[[90,320],[390,350],[420,110],[150,80]]}, // quadrilateral corners
+    {t:60}                              // parallel lines: transversal at t
+  ][rule];
+}
+
+/* ---------- drawing helpers (angles in degrees, anticlockwise from →) ---------- */
+const at=(o,deg,r)=>[o[0]+r*Math.cos(deg*RAD),o[1]-r*Math.sin(deg*RAD)];
+function seg(a,b,col,w){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=col;ctx.lineWidth=w||2.5;ctx.lineCap='round';ctx.stroke()}
+function dot(p,col,r){ctx.beginPath();ctx.arc(p[0],p[1],r||9,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.strokeStyle=BG;ctx.lineWidth=2;ctx.stroke()}
+function text(s,p,col,size,align){ctx.fillStyle=col;ctx.font='700 '+(size||15)+'px system-ui,sans-serif';ctx.textAlign=align||'center';ctx.textBaseline='middle';ctx.fillText(s,p[0],p[1])}
+// Arc from angle a1 to a2 (anticlockwise), labelled at its middle
+function arc(o,a1,a2,r,col,label,fill){
+  if(a2<a1)a2+=360;
+  ctx.beginPath();ctx.moveTo(o[0],o[1]);ctx.arc(o[0],o[1],r,-a1*RAD,-a2*RAD,true);ctx.closePath();
+  ctx.fillStyle=col+(fill===false?'00':'22');ctx.fill();
+  ctx.beginPath();ctx.arc(o[0],o[1],r,-a1*RAD,-a2*RAD,true);ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.stroke();
+  if(label){const m=(a1+a2)/2,lr=r+(a2-a1<25?30:20)+(label.length>5?14:0);text(label,at(o,m,lr),col,15)}
+}
+function rightMark(o,a,size){const p1=at(o,a,size),p3=at(o,a+90,size),p2=at(p1,a+90,size);ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.lineTo(p3[0],p3[1]);ctx.strokeStyle=LINE;ctx.lineWidth=1.5;ctx.stroke()}
+const dirOf=(o,p)=>{let d=Math.atan2(o[1]-p[1],p[0]-o[0])/RAD;return d<0?d+360:d};
+const r1=v=>Math.round(v*10)/10;
+const deg=v=>(Number.isInteger(v)?v:r1(v))+'°';
+
+/* Interior angles of a polygon given its corners (any orientation).
+   Returns null if two sides cross. */
+function interiorAngles(P){
+  const n=P.length;let area=0;
+  for(let i=0;i<n;i++){const a=P[i],b=P[(i+1)%n];area+=a[0]*b[1]-b[0]*a[1]}
+  const out=[];
+  for(let i=0;i<n;i++){
+    const prev=P[(i+n-1)%n],cur=P[i],next=P[(i+1)%n];
+    const v1=[prev[0]-cur[0],prev[1]-cur[1]],v2=[next[0]-cur[0],next[1]-cur[1]];
+    let a=Math.acos(Math.max(-1,Math.min(1,(v1[0]*v2[0]+v1[1]*v2[1])/(Math.hypot(...v1)*Math.hypot(...v2)))))/RAD;
+    const cross=(cur[0]-prev[0])*(next[1]-cur[1])-(cur[1]-prev[1])*(next[0]-cur[0]);
+    if(cross*area<0)a=360-a; // a reflex corner
+    out.push(a);
+  }
+  const sum=out.reduce((s,a)=>s+a,0);
+  return Math.abs(sum-(n-2)*180)<0.01?out:null;
+}
+
+/* ---------- each rule: draw, and list its drag handles ---------- */
+function handles(){
+  const s=st;
+  if(rule<=1)return[{p:at(s.o,s.t,150),ray:'t'}];
+  if(rule===2)return[{p:at(s.o,s.t1,150),ray:'t1'},{p:at(s.o,s.t2,150),ray:'t2'}];
+  if(rule===3)return[{p:at(s.o,s.t,170),ray:'t'}];
+  if(rule===4||rule===5)return s.p.map((p,i)=>({p,corner:i}));
+  return[{p:at([250,215],s.t,190),ray:'t'}];
+}
+
+function draw(){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
+  const s=st;let info='',note='';
+  if(rule===0){
+    const a=s.t,b=90-s.t;
+    seg(s.o,at(s.o,0,300),LINE);seg(s.o,at(s.o,90,250),LINE);seg(s.o,at(s.o,a,170),C3);
+    rightMark(s.o,0,18);
+    arc(s.o,0,a,60,C1,'a');arc(s.o,a,90,85,C2,'b');
+    info='a = '+deg(a)+'&nbsp;&nbsp; b = '+deg(b)+'<br>a + b = '+deg(a+b);
+  }else if(rule===1){
+    const a=s.t,b=180-s.t;
+    seg(at(s.o,180,210),at(s.o,0,210),LINE);seg(s.o,at(s.o,a,170),C3);
+    arc(s.o,0,a,55,C1,'a');arc(s.o,a,180,75,C2,'b');
+    info='a = '+deg(a)+'&nbsp;&nbsp; b = '+deg(b)+'<br>a + b = '+deg(a+b);
+  }else if(rule===2){
+    const a=s.t1,b=s.t2-s.t1,c=180-s.t2;
+    seg(at(s.o,180,210),at(s.o,0,210),LINE);seg(s.o,at(s.o,s.t1,170),C3);seg(s.o,at(s.o,s.t2,170),C3);
+    arc(s.o,0,s.t1,55,C1,'a');arc(s.o,s.t1,s.t2,72,C2,'b');arc(s.o,s.t2,180,55,ARC[3],'c');
+    info='a = '+deg(a)+'&nbsp;&nbsp; b = '+deg(b)+'&nbsp;&nbsp; c = '+deg(c)+'<br>a + b + c = '+deg(a+b+c);
+  }else if(rule===3){
+    const a=s.t,b=180-s.t;
+    seg(at(s.o,180,210),at(s.o,0,210),LINE);seg(at(s.o,s.t+180,170),at(s.o,s.t,170),C3);
+    arc(s.o,0,a,55,C1,'a = '+deg(a));arc(s.o,a,180,55,C2,'b = '+deg(b));arc(s.o,180,180+a,55,C1,'a = '+deg(a));arc(s.o,180+a,360,55,C2,'b = '+deg(b));
+    info='a = '+deg(a)+' (both)&nbsp;&nbsp; b = '+deg(b)+' (both)<br>Opposite angles match. Next to each other, a + b = '+deg(a+b);
+  }else if(rule===4||rule===5){
+    const P=s.p,n=P.length,names='ABCD';
+    ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);P.forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+    ctx.fillStyle=C1+'11';ctx.fill();ctx.strokeStyle=LINE;ctx.lineWidth=2.5;ctx.stroke();
+    const A=interiorAngles(P);
+    if(A){
+      // anticlockwise order on screen, so each arc runs inside the shape
+      let area=0;for(let i=0;i<n;i++){const a=P[i],b=P[(i+1)%n];area+=a[0]*b[1]-b[0]*a[1]}
+      P.forEach((p,i)=>{
+        const prev=P[(i+n-1)%n],next=P[(i+1)%n];
+        const d1=dirOf(p,next),d2=dirOf(p,prev);
+        // screen y points down, so area<0 means the corners go anticlockwise on screen
+        if(area<0)arc(p,d1,d1+A[i],34,ARC[i%4],deg(r1(A[i])));else arc(p,d2,d2+A[i],34,ARC[i%4],deg(r1(A[i])));
+      });
+      P.forEach((p,i)=>{const c=P.reduce((m,q)=>[m[0]+q[0]/n,m[1]+q[1]/n],[0,0]);const d=Math.hypot(p[0]-c[0],p[1]-c[1]);text(names[i],[p[0]+(p[0]-c[0])/d*26,p[1]+(p[1]-c[1])/d*26],TXT,16)});
+      const parts=A.map((a,i)=>names[i]+' = '+deg(r1(a)));
+      info=parts.join('&nbsp;&nbsp; ')+'<br>'+names.slice(0,n).split('').join(' + ')+' = '+deg(Math.round(A.reduce((t,a)=>t+a,0)));
+      note='Angles are rounded to 1 decimal place, so they may not add up exactly in your head. The total is worked out before rounding.';
+    }else{
+      info='The sides cross over, so this is not a quadrilateral any more.<br>Drag a corner back so the sides don’t cross.';
+    }
+  }else{
+    // two parallel lines and a transversal through (250,210)
+    const yTop=140,yBot=290,cx=250,cy=215,t=s.t,k=Math.cos(t*RAD)/Math.sin(t*RAD);
+    const P=[cx+(cy-yTop)*k,yTop],Q=[cx-(yBot-cy)*k,yBot];
+    seg([20,yTop],[480,yTop],LINE);seg([20,yBot],[480,yBot],LINE);
+    [[yTop],[yBot]].forEach(([y])=>{ctx.beginPath();ctx.moveTo(440,y-7);ctx.lineTo(452,y);ctx.lineTo(440,y+7);ctx.strokeStyle=LINE;ctx.lineWidth=2;ctx.stroke()});
+    seg(at([cx,cy],t+180,200),at([cx,cy],t,200),C3);
+    // the two angles of the chosen pair: [corner, from, to]
+    const sets=[
+      [[P,0,t],[Q,0,t]],               // corresponding: above-right at both
+      [[P,180,180+t],[Q,0,t]],         // alternate: between the lines, opposite sides
+      [[P,t+180,360],[Q,0,t]]          // co-interior: between the lines, same side
+    ][pair];
+    const v=sets.map(([,a1,a2])=>a2-a1);
+    sets.forEach(([o,a1,a2],i)=>arc(o,a1,a2,40,i?C2:C1,deg(v[i])));
+    dot(P,LINE,4);dot(Q,LINE,4);
+    info=['Top angle = '+deg(v[0])+'&nbsp;&nbsp; Bottom angle = '+deg(v[1])+'<br>They are equal.',
+          'Top angle = '+deg(v[0])+'&nbsp;&nbsp; Bottom angle = '+deg(v[1])+'<br>They are equal.',
+          'Top angle = '+deg(v[0])+'&nbsp;&nbsp; Bottom angle = '+deg(v[1])+'<br>Together: '+deg(v[0]+v[1])][pair];
+    note='The arrows show the two lines are parallel. Tilt the crossing line with the orange dot.';
+  }
+  handles().forEach(h=>dot(h.p,HANDLE));
+  document.getElementById('info').innerHTML='<div class="step-math">'+info+'</div>';
+  document.getElementById('rule').textContent=rule===6?PAIR_RULES[pair]:RULES[rule];
+  document.getElementById('note').textContent=note;
+}
+
+/* ---------- switching ---------- */
+function setRule(r){
+  rule=r;
+  document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('active',+b.dataset.m===r));
+  document.getElementById('pairRow').hidden=r!==6;
+  initState();draw();
+}
+function setPair(p){
+  pair=p;
+  document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('active',+b.dataset.p===p));
+  draw();
+}
+
+/* ---------- dragging (rays snap to whole degrees, corners to a 10px grid) ---------- */
+function pos(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]}
+cv.addEventListener('pointerdown',e=>{
+  const m=pos(e);let best=null,bd=28;
+  handles().forEach(h=>{const d=Math.hypot(h.p[0]-m[0],h.p[1]-m[1]);if(d<bd){bd=d;best=h}});
+  if(best){drag=best;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'}
+});
+cv.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const m=pos(e),s=st;
+  if(drag.corner!==undefined){
+    s.p[drag.corner]=[Math.min(W-20,Math.max(20,Math.round(m[0]/10)*10)),Math.min(H-20,Math.max(20,Math.round(m[1]/10)*10))];
+  }else{
+    const o=rule===6?[250,215]:s.o;
+    let d=Math.round(dirOf(o,m));
+    if(rule===0)d=d>225?1:Math.min(89,Math.max(1,d));
+    else if(rule===6)d=Math.min(150,Math.max(30,d>180?d-180:d));
+    else if(rule===2){
+      d=Math.min(179,Math.max(1,d>270?1:d>180?179:d));
+      if(drag.ray==='t1')d=Math.min(d,s.t2-1);else d=Math.max(d,s.t1+1);
+    }else d=Math.min(179,Math.max(1,d>270?1:d>180?179:d));
+    s[drag.ray]=d;
+  }
+  draw();
+});
+cv.addEventListener('pointerup',()=>{drag=null;cv.style.cursor='grab'});
+
+initState();draw();
+</script>
+</div></div></body></html>
