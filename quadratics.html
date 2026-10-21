@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Solving quadratics — VisualMaths</title>
+<style>@import url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
+
+:root {
+  --brand: #4338ca;
+  --brand-light: #e8e6fc;
+  --brand-dark: #312e81;
+  --teal: #0f766e;
+  --teal-light: #d5f5f0;
+  --amber: #b45309;
+  --amber-light: #fef3c7;
+  --coral: #c2410c;
+  --coral-light: #fff1e6;
+  --pink: #be185d;
+  --pink-light: #fce7f3;
+  --green: #15803d;
+  --green-light: #dcfce7;
+  --surface: #fafaf9;
+  --card: #ffffff;
+  --text: #1c1917;
+  --text-secondary: #78716c;
+  --text-tertiary: #a8a29e;
+  --border: #e7e5e4;
+  --border-strong: #d6d3d1;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: #818cf8;
+    --brand-light: #1e1b4b;
+    --brand-dark: #c7d2fe;
+    --teal: #5eead4;
+    --teal-light: #042f2e;
+    --amber: #fbbf24;
+    --amber-light: #422006;
+    --coral: #fb923c;
+    --coral-light: #431407;
+    --pink: #f472b6;
+    --pink-light: #500724;
+    --green: #4ade80;
+    --green-light: #052e16;
+    --surface: #0c0a09;
+    --card: #1c1917;
+    --text: #fafaf9;
+    --text-secondary: #a8a29e;
+    --text-tertiary: #78716c;
+    --border: #292524;
+    --border-strong: #44403c;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-home {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+}
+.nav-home svg { width: 20px; height: 20px; }
+.nav-sep { color: var(--text-tertiary); font-size: 14px; }
+.nav-title { font-size: 15px; color: var(--text-secondary); font-weight: 500; }
+
+/* TOOL PAGE LAYOUT */
+.tool-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+.tool-header {
+  margin-bottom: 24px;
+}
+.tool-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.tool-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.tool-body {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+/* COMMON WIDGET STYLES */
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.num-input {
+  width: 56px; font-size: 17px; font-weight: 600; text-align: center; padding: 6px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--card); color: var(--text);
+}
+.num-input:focus { outline: 2px solid var(--brand); outline-offset: -1px; border-color: var(--brand); }
+.sym { font-size: 20px; font-weight: 600; color: var(--text-secondary); }
+select {
+  font-size: 14px; padding: 6px 10px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--card); color: var(--text);
+}
+button {
+  font-size: 13px; font-weight: 500; padding: 7px 16px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--card); color: var(--text); cursor: pointer;
+  transition: background 0.15s;
+}
+button:hover { background: var(--surface); }
+button.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+button.primary:hover { opacity: 0.9; }
+
+.step-card {
+  background: var(--surface); border-radius: var(--radius-sm); padding: 12px 16px; margin: 8px 0;
+}
+.step-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.step-math { font-size: 16px; font-weight: 600; }
+.result-box {
+  text-align: center; font-size: 20px; font-weight: 700; padding: 14px;
+  background: var(--surface); border-radius: var(--radius-sm); margin: 12px 0;
+}
+.result-box.ok { color: var(--green); background: var(--green-light); }
+.hint { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+
+.bar-outer {
+  height: 38px; border-radius: 6px; overflow: hidden; display: flex;
+  border: 1px solid var(--border-strong);
+}
+.bar-seg { height: 100%; border-right: 1px solid rgba(0,0,0,0.08); }
+.bar-seg:last-child { border-right: none; }
+
+.mode-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.mode-btn { font-size: 13px; padding: 6px 14px; }
+.mode-btn.active { background: var(--brand-light); color: var(--brand); border-color: var(--brand); }
+
+/* WEIGHT BLOCKS (seesaw) */
+.wb {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; height: 32px; padding: 0 8px; border-radius: 6px;
+  font-size: 13px; font-weight: 600; cursor: grab; touch-action: none;
+}
+.wb:active { cursor: grabbing; }
+.w1 { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.w2 { background: var(--brand-light); color: var(--brand-dark); border: 1px solid #a5b4fc; }
+.w5 { background: var(--amber-light); color: var(--amber); border: 1px solid #fcd34d; }
+.w10 { background: var(--coral-light); color: var(--coral); border: 1px solid #fdba74; }
+.wx { background: var(--pink-light); color: var(--pink); border: 1px solid #f9a8d4; font-style: italic; }
+.wn { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+/* GRID TABLE */
+.g-table { border-collapse: collapse; }
+.g-table td, .g-table th { padding: 10px 16px; text-align: center; font-size: 15px; }
+.g-table th { font-weight: 600; color: var(--text-secondary); }
+
+/* CANVAS / SVG */
+canvas, svg { display: block; }
+
+/* HOMEPAGE */
+.home-hero {
+  text-align: center;
+  padding: 48px 20px 36px;
+}
+.home-hero h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+.home-hero p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.topic-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+}
+.card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700;
+}
+.card-title { font-size: 15px; font-weight: 600; }
+.card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.card-tag {
+  display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px;
+  border-radius: 4px; background: var(--surface); color: var(--text-tertiary);
+  align-self: flex-start; margin-top: auto;
+}
+
+.section-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text-tertiary); padding: 0 20px; max-width: 960px; margin: 24px auto 8px;
+}
+</style>
+<style>
+.eq-big{font-size:24px;font-weight:700;text-align:center;margin:8px 0;padding:14px;border-radius:var(--radius);letter-spacing:.5px;transition:background .3s}
+.eq-big.ok{background:var(--green-light);color:var(--green)}
+.eq-big.wk{background:var(--surface);color:var(--text)}
+.gbtn{font-size:14px;font-weight:600;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;transition:transform .1s}
+.gbtn:active{transform:scale(.97)}
+.gbtn.gp{background:var(--brand);color:#fff;border-color:var(--brand)}
+.grow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.ppill{font-size:13px;padding:6px 14px;border-radius:20px;cursor:pointer;font-weight:600}
+.ppill.ac{background:var(--brand-light);color:var(--brand);border-color:var(--brand)}
+.grid-box{margin:16px auto;max-width:420px}
+.gtable{border-collapse:separate;border-spacing:4px;width:100%}
+.gtable th{font-size:16px;font-weight:700;padding:10px 16px;text-align:center;color:var(--text-secondary)}
+.gcell{padding:14px 16px;text-align:center;font-size:18px;font-weight:700;border-radius:var(--radius-sm);transition:transform .3s,box-shadow .3s}
+.gcell.hi{transform:scale(1.08);box-shadow:0 0 0 3px var(--brand)}
+.c0{background:var(--brand-light);color:var(--brand-dark)}
+.c1{background:var(--teal-light);color:var(--teal)}
+.c2{background:var(--amber-light);color:var(--amber)}
+.c3{background:var(--coral-light);color:var(--coral)}
+.foil-step{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);margin:4px 0;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+.foil-step:hover{background:var(--surface)}
+.foil-step.active{background:var(--brand-light);color:var(--brand)}
+.foil-label{width:70px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary)}
+.foil-math{flex:1;font-size:16px}
+.collect-box{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin:10px 0;border-left:4px solid var(--teal)}
+.collect-title{font-size:12px;font-weight:600;color:var(--teal);margin-bottom:6px}
+.collect-math{font-size:18px;font-weight:700}
+/* ---- solving quadratics ---- */
+[hidden]{display:none!important}
+.coef-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;font-size:20px;margin:6px 0 4px}
+.coef-row .num-input{width:58px;font-size:18px}
+.coef-row i{font-weight:600}
+.step-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin:18px 0 6px}
+.task{font-size:16px;font-weight:600;margin:4px 0 10px}
+.pairs{border-collapse:separate;border-spacing:0 4px;width:100%;max-width:440px;margin:0 auto}
+.pairs th{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);padding:4px 10px;text-align:center}
+.pairs td{padding:9px 10px;text-align:center;font-size:17px;font-weight:600;background:var(--surface)}
+.pairs td:first-child{border-radius:8px 0 0 8px}.pairs td:last-child{border-radius:0 8px 8px 0}
+.pairs tr.pair{cursor:pointer}
+.pairs tr.pair:hover td{background:var(--brand-light)}
+.pairs tr.pair:focus-visible td{outline:2px solid var(--brand)}
+.pairs tr.right td{background:var(--green-light);color:var(--green)}
+.pairs tr.wrong td{background:#fee2e2;color:#991b1b}
+.pairs .sum{min-width:90px}
+.msg{padding:10px 14px;border-radius:var(--radius-sm);margin:10px 0;font-weight:600;font-size:15px}
+.msg.good{background:var(--green-light);color:var(--green)}
+.msg.bad{background:#fee2e2;color:#991b1b}
+.msg.info{background:var(--brand-light);color:var(--brand)}
+@media (prefers-color-scheme: dark){.pairs tr.wrong td,.msg.bad{background:#450a0a;color:#fca5a5}}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.gtable th.lab{font-style:italic}
+.split{font-size:19px;font-weight:700;text-align:center;margin:8px 0}
+.fsteps .fstep{background:var(--surface);border-radius:var(--radius-sm);padding:12px 16px;margin:8px 0;border-left:4px solid var(--brand)}
+.fstep .fl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:4px}
+.fstep .fm{font-size:18px;overflow-x:auto}
+.fstep .fn{font-size:14px;color:var(--text-secondary);margin-top:4px}
+.graph{width:100%;max-width:560px;display:block;margin:6px auto}
+.try{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-top:18px}
+.try .row{justify-content:center}
+.try input{width:80px}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+</head><body>
+<nav class="site-nav"><a href="index.html" class="nav-home"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7M5 8.5V16h4v-4h2v4h4V8.5"/></svg> VisualMaths</a><span class="nav-sep">/</span><span class="nav-title">Solving quadratics</span></nav>
+<div class="tool-page"><div class="tool-header"><h1>Solving quadratics</h1><p>Solve ax² + bx + c = 0 by factorising into two brackets, or with the quadratic formula. The graph shows the solutions: they are where the curve crosses the x-axis.</p></div>
+<div class="tool-body">
+<div class="mode-row" role="tablist" style="justify-content:center;flex-wrap:wrap">
+  <button class="mode-btn active" data-m="fact" onclick="setMode('fact')">Factorise (two brackets)</button>
+  <button class="mode-btn" data-m="form" onclick="setMode('form')">Quadratic formula</button>
+</div>
+<div class="grow" id="pre"></div>
+<div class="coef-row">
+  <input class="num-input" id="ia" type="number" value="1" aria-label="a" oninput="fromInputs()"><i>x²</i><span class="sym">+</span>
+  <input class="num-input" id="ib" type="number" value="5" aria-label="b" oninput="fromInputs()"><i>x</i><span class="sym">+</span>
+  <input class="num-input" id="ic" type="number" value="6" aria-label="c" oninput="fromInputs()"><span class="sym">= 0</span>
+</div>
+<p class="hint" style="text-align:center;margin-top:0">Type your own a, b and c, or pick one above.</p>
+<div class="eq-big wk" id="eq"></div>
+
+<section id="factPanel"></section>
+<section id="formPanel" hidden></section>
+
+<div class="step-title">The graph y = <span id="graphEq"></span></div>
+<svg class="graph" id="graph" viewBox="0 0 560 320" role="img" aria-label="Graph of the quadratic"></svg>
+
+<div class="try">
+  <div class="step-title" style="margin-top:0">Your turn: what are the solutions?</div>
+  <div class="row">
+    <label>x = <input class="num-input" id="t1" placeholder="e.g. -2"></label>
+    <label>x = <input class="num-input" id="t2" placeholder="or 1/2"></label>
+    <label style="font-size:14px"><input type="checkbox" id="tnone"> no real solutions</label>
+    <button class="primary" onclick="checkTry()">Check</button>
+  </div>
+  <div id="tryMsg"></div>
+</div>
+
+<script>
+/* ---------- numbers and formatting ---------- */
+const M='−';
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b)[a,b]=[b,a%b];return a||1};
+const fmtN=n=>n<0?M+Math.abs(n):String(n);
+// "2x", "−x", "x", "5"
+function term(c,v){if(v&&c===1)return v;if(v&&c===-1)return M+v;return fmtN(c)+(v||'')}
+// a x² + b x + c, written the usual way
+function poly(a,b,c){
+  const parts=[[a,'x²'],[b,'x'],[c,'']].filter(([k])=>k!==0);
+  if(!parts.length)return'0';
+  return parts.map(([k,v],i)=>{
+    if(i===0)return term(k,v);
+    return(k<0?' '+M+' ':' + ')+term(Math.abs(k),v);
+  }).join('');
+}
+// the same in LaTeX
+function polyTex(a,b,c){return poly(a,b,c).replace(/−/g,'-').replace(/x²/g,'x^2')}
+// fraction p/q in lowest terms, as LaTeX
+function fracTex(p,q){
+  if(q<0){p=-p;q=-q}
+  const g=gcd(p,q);p/=g;q/=g;
+  if(q===1)return String(p);
+  return(p<0?'-':'')+'\\frac{'+Math.abs(p)+'}{'+q+'}';
+}
+// bracket like (2x + 1); m x on its own when n = 0
+function bracket(m,n){
+  const lead=term(m,'x');
+  if(n===0)return lead;
+  return'('+lead+(n<0?' '+M+' ':' + ')+Math.abs(n)+')';
+}
+function tex(s,el,display){
+  if(typeof katex!=='undefined')katex.render(s,el,{throwOnError:false,displayMode:!!display});
+  else el.textContent=s;
+}
+
+/* ---------- presets ---------- */
+const PRESETS=[
+  {a:1,b:5,c:6},{a:1,b:-1,c:-12},{a:1,b:-6,c:9},{a:2,b:7,c:3},
+  {a:1,b:0,c:-16},{a:1,b:4,c:0},{a:1,b:3,c:-1},{a:1,b:2,c:5},
+];
+let A=1,B=5,C=6,mode='fact',found=null,fStep=1;
+
+function buildPresets(){
+  document.getElementById('pre').innerHTML=PRESETS.map((p,i)=>
+    '<button class="ppill" data-i="'+i+'" onclick="loadPreset('+i+')">'+poly(p.a,p.b,p.c)+' = 0</button>').join('');
+}
+function markPreset(){
+  document.querySelectorAll('.ppill').forEach(b=>{const p=PRESETS[+b.dataset.i];b.classList.toggle('ac',p.a===A&&p.b===B&&p.c===C)});
+}
+function loadPreset(i){
+  const p=PRESETS[i];
+  document.getElementById('ia').value=p.a;document.getElementById('ib').value=p.b;document.getElementById('ic').value=p.c;
+  fromInputs();
+}
+function fromInputs(){
+  const v=id=>{const n=parseInt(document.getElementById(id).value,10);return isNaN(n)?0:n};
+  A=v('ia');B=v('ib');C=v('ic');
+  found=null;fStep=1;
+  document.getElementById('tryMsg').innerHTML='';
+  render();
+}
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+  document.getElementById('factPanel').hidden=m!=='fact';
+  document.getElementById('formPanel').hidden=m!=='form';
+  render();
+}
+
+/* ---------- solutions (for the graph and the checks) ---------- */
+function solutions(){
+  if(A===0)return null;
+  const D=B*B-4*A*C;
+  if(D<0)return[];
+  if(D===0)return[-B/(2*A)];
+  return[(-B-Math.sqrt(D))/(2*A),(-B+Math.sqrt(D))/(2*A)];
+}
+
+/* ---------- method 1: factorise into two brackets ---------- */
+// Pairs of whole numbers that multiply to a×c
+function factorPairs(n){
+  if(n===0)return[[0,B]];
+  const out=[];
+  for(let d=1;d*d<=Math.abs(n);d++){
+    if(n%d===0){out.push([d,n/d]);out.push([-d,-n/d])}
+  }
+  return out.slice(0,24);
+}
+function renderFact(){
+  const el=document.getElementById('factPanel');
+  if(A===0){el.innerHTML='<div class="msg info">With a = 0 this is not a quadratic. Make a a whole number that is not 0.</div>';return}
+  // Work with a positive a: multiplying both sides by −1 keeps the same solutions
+  const flip=A<0, a=flip?-A:A, b=flip?-B:B, c=flip?-C:C;
+  const ac=a*c, pairs=factorPairs(ac);
+  const works=pairs.find(([p,q])=>p+q===b);
+  let h='';
+  if(flip)h+='<div class="msg info">a is negative, so first multiply every term by −1: '+poly(a,b,c)+' = 0 (same solutions).</div>';
+  h+='<div class="step-title">Step 1 · Find the two numbers</div>';
+  h+='<div class="task">Find two numbers that <u>multiply</u> to a × c = '+fmtN(a)+' × '+fmtN(c)+' = <b>'+fmtN(ac)+'</b> and <u>add</u> to b = <b>'+fmtN(b)+'</b>.'+(a===1?'':' (When a is not 1, use a × c.)')+'</div>';
+  if(ac===0){
+    h+='<div class="msg info">c is 0, so x is a common factor: the numbers are 0 and '+fmtN(b)+'.</div>';
+  }else{
+    h+='<table class="pairs"><thead><tr><th>Numbers</th><th>Multiply</th><th class="sum">Add</th></tr></thead><tbody>'+
+      pairs.map(([p,q],i)=>'<tr class="pair" tabindex="0" data-i="'+i+'" onclick="pickPair('+i+')" onkeydown="if(event.key===\'Enter\')pickPair('+i+')"><td>'+fmtN(p)+' and '+fmtN(q)+'</td><td>'+fmtN(p*q)+'</td><td class="sum" id="sum'+i+'">?</td></tr>').join('')+
+      '</tbody></table>';
+    h+='<p class="hint" style="text-align:center">Click a pair to add the numbers. Which one makes '+fmtN(b)+'?</p>';
+    h+='<div class="btns"><button onclick="showPair()">Show me</button></div>';
+  }
+  h+='<div id="pairMsg"></div><div id="factRest"></div>';
+  el.innerHTML=h;
+  el._ctx={a,b,c,pairs,works};
+  if(ac===0)finishFact([0,b]);
+  else if(!works)document.getElementById('pairMsg').innerHTML='';
+  if(found)finishFact(found);
+}
+function pickPair(i){
+  const ctx=document.getElementById('factPanel')._ctx,[p,q]=ctx.pairs[i];
+  document.getElementById('sum'+i).textContent=fmtN(p+q);
+  const row=document.querySelector('.pairs tr[data-i="'+i+'"]');
+  if(p+q===ctx.b){
+    row.classList.add('right');
+    document.getElementById('pairMsg').innerHTML='<div class="msg good">✓ '+fmtN(p)+' × '+fmtN(q)+' = '+fmtN(ctx.a*ctx.c)+' and '+fmtN(p)+' + '+fmtN(q)+' = '+fmtN(ctx.b)+'. These are the two numbers.</div>';
+    found=[p,q];finishFact(found);
+  }else{
+    row.classList.add('wrong');
+    const tried=document.querySelectorAll('.pairs tr.wrong').length;
+    const none=!ctx.works&&tried===ctx.pairs.length;
+    document.getElementById('pairMsg').innerHTML=none
+      ?'<div class="msg bad">None of the pairs add to '+fmtN(ctx.b)+', so this quadratic does not factorise into whole-number brackets. Use the quadratic formula. <button onclick="setMode(\'form\')">Use the formula</button></div>'
+      :'<div class="msg bad">'+fmtN(p)+' + '+fmtN(q)+' = '+fmtN(p+q)+', not '+fmtN(ctx.b)+'. Try another pair.</div>';
+  }
+}
+function showPair(){
+  const ctx=document.getElementById('factPanel')._ctx;
+  if(!ctx.works){
+    ctx.pairs.forEach((pq,i)=>{document.getElementById('sum'+i).textContent=fmtN(pq[0]+pq[1])});
+    document.getElementById('pairMsg').innerHTML='<div class="msg bad">No pair adds to '+fmtN(ctx.b)+', so this quadratic does not factorise into whole-number brackets. Use the quadratic formula. <button onclick="setMode(\'form\')">Use the formula</button></div>';
+    return;
+  }
+  pickPair(ctx.pairs.indexOf(ctx.works));
+}
+function finishFact([p,q]){
+  const {a,b,c}=document.getElementById('factPanel')._ctx;
+  // (ax + p)(ax + q) / a, shared out so both brackets are whole numbers
+  const g1=gcd(a,p), m1=a/g1, n1=p/g1, m2=g1, n2=q*g1/a;
+  const split='<span>'+poly(a,0,0)+'</span>'+(p<0?' '+M+' ':' + ')+term(Math.abs(p),'x')+(q<0?' '+M+' ':' + ')+term(Math.abs(q),'x')+(c===0?'':(c<0?' '+M+' ':' + ')+Math.abs(c));
+  let h='<div class="step-title">Step 2 · Split the middle and make the brackets</div>';
+  h+='<div class="task">Write '+term(b,'x')+' as '+term(p,'x')+' and '+term(q,'x')+':</div>';
+  h+='<div class="split">'+split+' = 0</div>';
+  h+='<div class="hint" style="text-align:center">The four parts fill a rectangle. Its sides are the two brackets.</div>';
+  const cell=(v,cls)=>'<td class="gcell '+cls+'">'+v+'</td>';
+  h+='<div class="grid-box"><table class="gtable"><tr><th></th><th class="lab">'+term(m2,'x')+'</th><th class="lab">'+fmtN(n2)+'</th></tr>'+
+     '<tr><th class="lab">'+term(m1,'x')+'</th>'+cell(term(m1*m2,'x²'),'c0')+cell(term(m1*n2,'x'),'c1')+'</tr>'+
+     '<tr><th class="lab">'+fmtN(n1)+'</th>'+cell(term(n1*m2,'x'),'c2')+cell(fmtN(n1*n2),'c3')+'</tr></table></div>';
+  const prod=bracket(m1,n1)+bracket(m2,n2);
+  h+='<div class="split">'+poly(a,b,c)+' = '+prod+'</div>';
+  h+='<div class="step-title">Step 3 · Each bracket can be 0</div>';
+  h+='<div class="task">If two things multiply to make 0, one of them must be 0:</div>';
+  const sols=[[m1,n1],[m2,n2]].map(([m,n])=>({br:n===0?term(m,'x'):term(m,'x')+(n<0?' '+M+' ':' + ')+Math.abs(n),x:fracTex(-n,m)}));
+  h+='<div class="fsteps">'+sols.map(s=>'<div class="fstep"><div class="fm" data-tex="'+(s.br.replace(/−/g,'-'))+' = 0 \\;\\Rightarrow\\; x = '+s.x+'"></div></div>').join('')+'</div>';
+  const same=sols[0].x===sols[1].x;
+  h+='<div class="eq-big ok" data-tex="'+(same?'x = '+sols[0].x+'\\quad\\text{(a repeated root)}':'x = '+sols[0].x+'\\quad\\text{or}\\quad x = '+sols[1].x)+'"></div>';
+  document.getElementById('factRest').innerHTML=h;
+  document.querySelectorAll('#factRest [data-tex]').forEach(e=>tex(e.dataset.tex,e,true));
+}
+
+/* ---------- method 2: the quadratic formula ---------- */
+function formulaSteps(){
+  const a=A,b=B,c=C,D=b*b-4*a*c;
+  const pb=v=>v<0?'('+v+')':String(v);
+  const steps=[];
+  steps.push({l:'Find a, b and c',m:'a = '+a+',\\quad b = '+b+',\\quad c = '+c,n:'Compare '+poly(a,b,c)+' = 0 with ax² + bx + c = 0.'});
+  steps.push({l:'The formula',m:'x = \\dfrac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',n:'± means: work it out once with +, and once with −.'});
+  const dn=D>0?'positive, so there are two solutions: the curve crosses the x-axis twice.'
+          :D===0?'0, so there is one (repeated) solution: the curve just touches the x-axis.'
+          :'negative, so there are no real solutions: you cannot take the square root of a negative number, and the curve never crosses the x-axis.';
+  steps.push({l:'The discriminant: b² − 4ac',m:'b^2 - 4ac = '+pb(b)+'^2 - 4 \\times '+pb(a)+' \\times '+pb(c)+' = '+(b*b)+(4*a*c<0?' + '+(-4*a*c):' - '+(4*a*c))+' = '+D,n:'It is '+dn});
+  if(D<0){steps.push({l:'Answer',m:'\\text{No real solutions}',final:true});return steps}
+  const r=Math.sqrt(D),exact=Number.isInteger(r);
+  // √D simplified: √D = k√s
+  let k=1,s=D;for(let f=2;f*f<=s;f++)while(s%(f*f)===0){s/=f*f;k*=f}
+  const root=exact?String(r):(k>1?k:'')+'\\sqrt{'+s+'}';
+  steps.push({l:'Put the numbers in',m:'x = \\dfrac{-'+pb(b)+' \\pm \\sqrt{'+D+'}}{2 \\times '+pb(a)+'} = \\dfrac{'+(-b)+' \\pm '+root+'}{'+(2*a)+'}',n:exact?'√'+D+' = '+r+'.':(k>1?'√'+D+' = '+k+'√'+s+'. ':'')+'√'+D+' is not a whole number, so the answers are surds (or decimals).'});
+  if(D===0){steps.push({l:'Answer',m:'x = '+fracTex(-b,2*a)+'\\quad\\text{(a repeated root)}',final:true});return steps}
+  if(exact){
+    steps.push({l:'Work out + and −',m:'x = \\dfrac{'+(-b)+' + '+r+'}{'+(2*a)+'} = '+fracTex(-b+r,2*a)+'\\qquad x = \\dfrac{'+(-b)+' - '+r+'}{'+(2*a)+'} = '+fracTex(-b-r,2*a)});
+    steps.push({l:'Answer',m:'x = '+fracTex(-b+r,2*a)+'\\quad\\text{or}\\quad x = '+fracTex(-b-r,2*a),final:true});
+  }else{
+    const x1=(-b+r)/(2*a),x2=(-b-r)/(2*a);
+    steps.push({l:'Work out + and −',m:'x = \\dfrac{'+(-b)+' + '+root+'}{'+(2*a)+'} \\approx '+x1.toFixed(2)+'\\qquad x = \\dfrac{'+(-b)+' - '+root+'}{'+(2*a)+'} \\approx '+x2.toFixed(2),n:'Rounded to 2 decimal places.'});
+    steps.push({l:'Answer',m:'x \\approx '+x1.toFixed(2)+'\\quad\\text{or}\\quad x \\approx '+x2.toFixed(2),final:true});
+  }
+  return steps;
+}
+function renderForm(){
+  const el=document.getElementById('formPanel');
+  if(A===0){el.innerHTML='<div class="msg info">With a = 0 this is not a quadratic. Make a a whole number that is not 0.</div>';return}
+  const steps=formulaSteps();
+  fStep=Math.min(fStep,steps.length);
+  let h='<div class="fsteps">'+steps.slice(0,fStep).map(s=>
+    '<div class="'+(s.final?'eq-big ok':'fstep')+'">'+(s.final?'':'<div class="fl">'+s.l+'</div>')+'<div class="fm" data-tex="'+s.m.replace(/"/g,'&quot;')+'"></div>'+(s.n?'<div class="fn">'+s.n+'</div>':'')+'</div>').join('')+'</div>';
+  h+='<div class="btns">'+
+     (fStep<steps.length?'<button class="primary" onclick="fStep++;renderForm()">▶ Next step</button><button onclick="fStep=99;renderForm()">Show all</button>':'')+
+     (fStep>1?'<button onclick="fStep=1;renderForm()">Start again</button>':'')+'</div>';
+  el.innerHTML=h;
+  el.querySelectorAll('[data-tex]').forEach(e=>tex(e.dataset.tex,e,true));
+}
+
+/* ---------- graph ---------- */
+function renderGraph(){
+  const svg=document.getElementById('graph'),W=560,H=320,pad=34;
+  document.getElementById('graphEq').textContent=poly(A,B,C);
+  if(A===0){svg.innerHTML='';return}
+  const xv=-B/(2*A),yv=A*xv*xv+B*xv+C,sols=solutions()||[];
+  const xs=[xv,...sols];
+  let x0=Math.floor(Math.min(...xs)-3),x1=Math.ceil(Math.max(...xs)+3);
+  const f=x=>A*x*x+B*x+C;
+  const ys=[0,yv,f(x0),f(x1)];
+  let y0=Math.min(...ys),y1=Math.max(...ys);
+  const span=Math.max(4,y1-y0);y0-=span*.08;y1+=span*.08;
+  const X=x=>pad+(x-x0)/(x1-x0)*(W-2*pad),Y=y=>H-pad-(y-y0)/(y1-y0)*(H-2*pad);
+  const css=getComputedStyle(document.documentElement);
+  const ink=css.getPropertyValue('--text').trim()||'#1c1917',faint=css.getPropertyValue('--border-strong').trim()||'#d6d3d1',
+        brand=css.getPropertyValue('--brand').trim()||'#4338ca',coral=css.getPropertyValue('--coral').trim()||'#c2410c';
+  let o='';
+  // grid + axes
+  const step=Math.max(1,Math.ceil((x1-x0)/12));
+  for(let x=Math.ceil(x0);x<=x1;x+=step){o+='<line x1="'+X(x)+'" y1="'+pad+'" x2="'+X(x)+'" y2="'+(H-pad)+'" stroke="'+faint+'" stroke-width="0.6"/>';
+    o+='<text x="'+X(x)+'" y="'+(Math.min(Math.max(Y(0)+16,pad+12),H-6))+'" font-size="11" text-anchor="middle" fill="'+ink+'">'+(x<0?M+(-x):x)+'</text>'}
+  if(y0<0&&y1>0)o+='<line x1="'+pad+'" y1="'+Y(0)+'" x2="'+(W-pad)+'" y2="'+Y(0)+'" stroke="'+ink+'" stroke-width="1.6"/>';
+  if(x0<0&&x1>0)o+='<line x1="'+X(0)+'" y1="'+pad+'" x2="'+X(0)+'" y2="'+(H-pad)+'" stroke="'+ink+'" stroke-width="1.6"/>';
+  o+='<text x="'+(W-pad+6)+'" y="'+(Y(0)+4)+'" font-size="13" fill="'+ink+'">x</text>';
+  // curve
+  let d='';for(let i=0;i<=200;i++){const x=x0+(x1-x0)*i/200,y=f(x);const py=Math.max(-50,Math.min(H+50,Y(y)));d+=(i?'L':'M')+X(x).toFixed(1)+' '+py.toFixed(1)}
+  o+='<path d="'+d+'" fill="none" stroke="'+brand+'" stroke-width="3"/>';
+  // solutions
+  sols.forEach(s=>{o+='<circle cx="'+X(s)+'" cy="'+Y(0)+'" r="7" fill="'+coral+'"/>';
+    o+='<text x="'+X(s)+'" y="'+(Y(0)-14)+'" font-size="13" font-weight="700" text-anchor="middle" fill="'+coral+'">x = '+(Number.isInteger(s)?fmtN(s):fmtN(+s.toFixed(2)))+'</text>'});
+  if(!sols.length)o+='<text x="'+(W/2)+'" y="'+(pad-10)+'" font-size="13" font-weight="700" text-anchor="middle" fill="'+coral+'">The curve never crosses the x-axis: no real solutions</text>';
+  svg.innerHTML=o;
+}
+
+/* ---------- your turn ---------- */
+function readNum(s){
+  s=String(s).trim().replace(/−/g,'-');
+  if(!s)return null;
+  const m=/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/.exec(s);
+  if(m)return+m[1]/+m[2];
+  const n=Number(s);return isNaN(n)?NaN:n;
+}
+function checkTry(){
+  const out=document.getElementById('tryMsg'),sols=solutions();
+  if(!sols){out.innerHTML='<div class="msg info">Set a to a number that is not 0 first.</div>';return}
+  const none=document.getElementById('tnone').checked;
+  const given=[readNum(document.getElementById('t1').value),readNum(document.getElementById('t2').value)].filter(v=>v!==null);
+  if(given.some(v=>isNaN(v))){out.innerHTML='<div class="msg bad">Type numbers like 3, −2, 0.5 or 1/2.</div>';return}
+  const close=(u,v)=>Math.abs(u-v)<0.01;
+  let ok,msg;
+  if(none){ok=!sols.length;msg=ok?'✓ Right: there are no real solutions.':'Not quite: this one does have real solutions. Look at the graph.'}
+  else if(!sols.length){ok=false;msg='Not quite: look at the graph. Does the curve cross the x-axis?'}
+  else if(!given.length){ok=false;msg='Type your solutions first.'}
+  else{
+    const allFound=sols.every(s=>given.some(g=>close(g,s))),noneWrong=given.every(g=>sols.some(s=>close(g,s)));
+    ok=allFound&&noneWrong;
+    msg=ok?'✓ Correct!':noneWrong?'Nearly: that is right, but there is another solution.':'Not quite. Put your answer back into '+poly(A,B,C)+' and see if you get 0.';
+  }
+  out.innerHTML='<div class="msg '+(ok?'good':'bad')+'">'+msg+(Number.isInteger(sols[0])||!sols.length?'':' (Decimals to 2 decimal places are fine.)')+'</div>';
+}
+
+/* ---------- draw everything ---------- */
+function render(){
+  document.getElementById('eq').textContent=A===0?'a must not be 0':poly(A,B,C)+' = 0';
+  markPreset();
+  if(mode==='fact')renderFact();else renderForm();
+  renderGraph();
+}
+buildPresets();
+window.addEventListener('DOMContentLoaded',()=>{fromInputs()});
+</script>
+</div></div></body></html>
