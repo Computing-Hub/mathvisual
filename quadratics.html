@@ -304,7 +304,34 @@ canvas, svg { display: block; }
 .try{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin-top:18px}
 .try .row{justify-content:center}
 .try input{width:80px}
+.explain{background:var(--brand-light);border-radius:var(--radius);padding:12px 16px;margin:12px 0}
+.explain summary{cursor:pointer;font-weight:700;color:var(--brand)}
+.explain p,.explain li{font-size:15px;line-height:1.55}
+.explain ol{padding-left:20px;margin:8px 0}
+.explain .ex{font-weight:700;white-space:nowrap}
+/* practise */
+.ex-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ex-dots{display:flex;gap:6px;flex-wrap:wrap}
+.ex-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border-strong);background:var(--card);font-size:12px;font-weight:700;padding:0;color:var(--text-secondary)}
+.ex-dot.cur{border-color:var(--brand);color:var(--brand)}
+.ex-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.ex-level{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary)}
+.ex-part{background:var(--surface);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
+.ex-part.locked{opacity:.5}
+.ex-q{font-size:16px;font-weight:600;margin-bottom:8px}
+.ans-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ans-row .lbl{font-size:20px;font-weight:700}
+math-field.ans{min-width:180px;flex:1 1 200px;font-size:24px;padding:6px 10px;border:2px solid var(--border-strong);border-radius:10px;background:var(--card);color:var(--text)}
+math-field.ans:focus-within{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px var(--brand-light)}
+math-field.ans.good{border-color:var(--green)}
+math-field.ans.bad{border-color:#dc2626}
+math-field::part(menu-toggle),math-field::part(virtual-keyboard-toggle){display:none}
+.kbd-btn{font-weight:700}
+.ex-nav{display:flex;justify-content:space-between;gap:8px;margin-top:12px;flex-wrap:wrap}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/mathlive@0.111.0/mathlive-static.css">
+<script defer src="https://unpkg.com/mathlive@0.111.0/mathlive.min.js"></script>
+<script src="answer-checker.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 </head><body>
 <nav class="site-nav"><a href="index.html" class="nav-home"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7M5 8.5V16h4v-4h2v4h4V8.5"/></svg> VisualMaths</a><span class="nav-sep">/</span><span class="nav-title">Solving quadratics</span></nav>
@@ -313,7 +340,9 @@ canvas, svg { display: block; }
 <div class="mode-row" role="tablist" style="justify-content:center;flex-wrap:wrap">
   <button class="mode-btn active" data-m="fact" onclick="setMode('fact')">Factorise (two brackets)</button>
   <button class="mode-btn" data-m="form" onclick="setMode('form')">Quadratic formula</button>
+  <button class="mode-btn" data-m="prac" onclick="setMode('prac')">✏️ Practise</button>
 </div>
+<div id="explainer">
 <div class="grow" id="pre"></div>
 <div class="coef-row">
   <input class="num-input" id="ia" type="number" value="1" aria-label="a" oninput="fromInputs()"><i>x²</i><span class="sym">+</span>
@@ -339,6 +368,8 @@ canvas, svg { display: block; }
   </div>
   <div id="tryMsg"></div>
 </div>
+</div>
+<section id="pracPanel" hidden></section>
 
 <script>
 /* ---------- numbers and formatting ---------- */
@@ -405,8 +436,11 @@ function fromInputs(){
 function setMode(m){
   mode=m;
   document.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+  document.getElementById('explainer').hidden=m==='prac';
+  document.getElementById('pracPanel').hidden=m!=='prac';
   document.getElementById('factPanel').hidden=m!=='fact';
   document.getElementById('formPanel').hidden=m!=='form';
+  if(m==='prac'){renderPractice();return}
   render();
 }
 
@@ -429,6 +463,15 @@ function factorPairs(n){
   }
   return out.slice(0,24);
 }
+const EXPLAIN='<details class="explain" '+(window.innerWidth>700?'open':'')+'><summary>How factorising works (and why)</summary>'+
+ '<ol>'+
+ '<li><b>Why two numbers?</b> Multiplying out two brackets gives <span class="ex">(x + p)(x + q) = x² + (p + q)x + p × q</span>. So to go backwards we need two numbers that <b>add</b> to the number in front of x and <b>multiply</b> to the number on its own. For x² + 5x + 6: 2 + 3 = 5 and 2 × 3 = 6.</li>'+
+ '<li><b>Signs:</b> if the number on its own is positive, both numbers have the same sign as b. If it is negative, one is positive and one is negative.</li>'+
+ '<li><b>Split the middle:</b> 5x = 2x + 3x, so x² + 2x + 3x + 6. The four parts fill a rectangle, and its sides are the brackets: <span class="ex">(x + 2)(x + 3)</span>.</li>'+
+ '<li><b>When a is not 1</b> (like 2x² + 7x + 3), look for two numbers that multiply to <b>a × c</b> (here 6) and add to b (7): 1 and 6. Split 7x into x + 6x and the grid gives <span class="ex">(2x + 1)(x + 3)</span>.</li>'+
+ '<li><b>Solve:</b> if two things multiply to make 0, one of them must be 0. So x + 2 = 0 or x + 3 = 0, giving x = −2 or x = −3.</li>'+
+ '<li><b>Check:</b> multiply your brackets out again. You should get back to the quadratic you started with.</li>'+
+ '</ol></details>';
 function renderFact(){
   const el=document.getElementById('factPanel');
   if(A===0){el.innerHTML='<div class="msg info">With a = 0 this is not a quadratic. Make a a whole number that is not 0.</div>';return}
@@ -436,7 +479,7 @@ function renderFact(){
   const flip=A<0, a=flip?-A:A, b=flip?-B:B, c=flip?-C:C;
   const ac=a*c, pairs=factorPairs(ac);
   const works=pairs.find(([p,q])=>p+q===b);
-  let h='';
+  let h=EXPLAIN;
   if(flip)h+='<div class="msg info">a is negative, so first multiply every term by −1: '+poly(a,b,c)+' = 0 (same solutions).</div>';
   h+='<div class="step-title">Step 1 · Find the two numbers</div>';
   h+='<div class="task">Find two numbers that <u>multiply</u> to a × c = '+fmtN(a)+' × '+fmtN(c)+' = <b>'+fmtN(ac)+'</b> and <u>add</u> to b = <b>'+fmtN(b)+'</b>.'+(a===1?'':' (When a is not 1, use a × c.)')+'</div>';
@@ -608,6 +651,131 @@ function checkTry(){
     msg=ok?'✓ Correct!':noneWrong?'Nearly: that is right, but there is another solution.':'Not quite. Put your answer back into '+poly(A,B,C)+' and see if you get 0.';
   }
   out.innerHTML='<div class="msg '+(ok?'good':'bad')+'">'+msg+(Number.isInteger(sols[0])||!sols.length?'':' (Decimals to 2 decimal places are fine.)')+'</div>';
+}
+
+
+/* ---------- ✏️ practise: type the brackets, then the solutions ---------- */
+const EXERCISES=[
+  {a:1,b:7,c:12,lv:'Level 1 · all positive'},{a:1,b:8,c:15,lv:'Level 1 · all positive'},
+  {a:1,b:-2,c:-15,lv:'Level 2 · negatives'},{a:1,b:-9,c:20,lv:'Level 2 · negatives'},{a:1,b:1,c:-20,lv:'Level 2 · negatives'},
+  {a:1,b:0,c:-25,lv:'Level 3 · special cases'},{a:1,b:-5,c:0,lv:'Level 3 · special cases'},{a:1,b:10,c:25,lv:'Level 3 · special cases'},
+  {a:2,b:5,c:3,lv:'Level 4 · a is not 1'},{a:3,b:-1,c:-2,lv:'Level 4 · a is not 1'},
+  {a:1,b:4,c:1,lv:'Level 5 · use the formula'},{a:2,b:-3,c:-4,lv:'Level 5 · use the formula'},
+];
+let exI=0;const exDone={};
+const QUAD_KB={label:'Maths',rows:[
+  [{class:'small',latex:'x'},{class:'small',latex:'#@^{2}',label:'□²'},{class:'small',latex:'\\left(#0\\right)',label:'( )'},
+   {class:'small',latex:'\\frac{#@}{#0}',label:'□/□'},{class:'small',latex:'\\sqrt{#0}',label:'√□'}],
+  ['[7]','[8]','[9]','[+]','[-]'],
+  ['[4]','[5]','[6]',{latex:'\\times',label:'×'},'[backspace]'],
+  ['[1]','[2]','[3]','[.]','[left]'],
+  ['[0]',{class:'action',label:'Clear',command:['deleteAll']},'[right]'],
+]};
+function factorises(e){const ac=e.a*e.c;return ac===0||factorPairs(ac).some(([p,q])=>p+q===e.b)}
+function exSolutions(e){const D=e.b*e.b-4*e.a*e.c;if(D<0)return[];if(D===0)return[-e.b/(2*e.a),-e.b/(2*e.a)];return[(-e.b-Math.sqrt(D))/(2*e.a),(-e.b+Math.sqrt(D))/(2*e.a)]}
+function mkBox(id,label){
+  const box=document.createElement('math-field');
+  box.id=id;box.className='ans';box.setAttribute('aria-label',label);
+  box.mathVirtualKeyboardPolicy='manual';box.smartMode=false;box.defaultMode='math';
+  box.addEventListener('focusin',()=>{if(window.mathVirtualKeyboard)window.mathVirtualKeyboard.layouts=[QUAD_KB]});
+  return box;
+}
+function kbButton(getBox){
+  const b=document.createElement('button');b.type='button';b.className='kbd-btn';b.innerHTML='⌨️ Maths keyboard';
+  b.onclick=()=>{const kb=window.mathVirtualKeyboard;if(!kb)return;const box=getBox();kb.layouts=[QUAD_KB];
+    if(!kb._watched){kb._watched=true;kb.addEventListener('geometrychange',()=>{document.body.style.paddingBottom=kb.visible?Math.ceil(kb.boundingRect.height)+'px':''})}
+    box.focus();kb.show();setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}),300)};
+  return b;
+}
+function say(el,ok,text){el.innerHTML='<div class="msg '+(ok?'good':'bad')+'"></div>';el.firstChild.textContent=text}
+
+// Brackets: equal to the quadratic, and really two brackets multiplied together
+function checkBrackets(latex,e){
+  if(!latex.replace(/\\placeholder\{\}|\s/g,''))return[false,'Type the brackets first, like (x + 2)(x + 3).'];
+  let tree;try{tree=LatexMath.parse(latex)}catch(err){return[false,"I can't read that: "+err.message+'.']}
+  const want=LatexMath.parse(polyTex(e.a,e.b,e.c));
+  if(!AnswerChecker.sameValue(tree,want))return[false,'Not quite. Multiply your brackets out: they should give back '+poly(e.a,e.b,e.c)+'.'];
+  // (x + 5)² counts as two brackets: (x + 5)(x + 5)
+  const flat=n=>n.k==='*'?[...flat(n.a),...flat(n.b)]:n.k==='paren'&&n.a.k==='*'?flat(n.a):
+    (n.k==='^'&&n.b.k==='num'&&n.b.v===2)?[n.a,n.a]:[n];
+  const parts=flat(tree).filter(f=>LatexMath.variables(f).size);
+  const linear=f=>{try{const g=x=>LatexMath.evaluate(f,{x});return Math.abs(g(0)-2*g(1)+g(2))<1e-9&&g(1)!==g(0)}catch(err){return false}};
+  if(parts.length!==2||!parts.every(linear))return[false,'That is equal, but write it as two brackets multiplied together, like (x + 2)(x + 3).'];
+  return[true,'✓ Correct! '+poly(e.a,e.b,e.c)+' = your brackets.'];
+}
+function renderPractice(){
+  const el=document.getElementById('pracPanel'),e=EXERCISES[exI],st=exDone[exI]||(exDone[exI]={fact:false,solve:false,tries:0});
+  const canFactor=factorises(e),eq=poly(e.a,e.b,e.c)+' = 0';
+  let h='<div class="ex-head"><div><div class="ex-level">'+e.lv+'</div><b>Exercise '+(exI+1)+' of '+EXERCISES.length+'</b></div><div class="ex-dots">'+
+    EXERCISES.map((x,i)=>'<button class="ex-dot'+(i===exI?' cur':'')+(exDone[i]&&exDone[i].solve?' done':'')+'" onclick="exI='+i+';renderPractice()" aria-label="Exercise '+(i+1)+'">'+(i+1)+'</button>').join('')+'</div></div>';
+  h+='<div class="eq-big wk">Solve '+eq+'</div>';
+  h+='<p class="hint" style="text-align:center">Click a box and type. <b>x^2</b> makes x², <b>/</b> makes a fraction, <b>sqrt</b> a square root. Or use the ⌨️ Maths keyboard.</p>';
+  if(canFactor){
+    h+='<div class="ex-part" id="partA"><div class="ex-q">1 · Factorise '+poly(e.a,e.b,e.c)+' into two brackets</div><div class="ans-row" id="rowA"></div><div class="btns" style="justify-content:flex-start"><button class="primary" onclick="checkA()">Check brackets</button><button onclick="hintA()">Hint</button></div><div id="msgA"></div></div>';
+  }else{
+    h+='<div class="msg info">This one does not factorise into whole-number brackets: no pair of numbers multiplies to a × c = '+fmtN(e.a*e.c)+' and adds to '+fmtN(e.b)+'. Use the quadratic formula. Exact answers (surds) or decimals to 2 d.p. are both fine.</div>';
+  }
+  h+='<div class="ex-part'+(canFactor&&!st.fact?' locked':'')+'" id="partB"><div class="ex-q">'+(canFactor?'2 · Now solve: each bracket = 0':'Solve with the formula')+'</div><div class="ans-row" id="rowB"></div><div class="btns" style="justify-content:flex-start"><button class="primary" onclick="checkB()">Check solutions</button><button onclick="hintB()">Hint</button></div><div id="msgB"></div></div>';
+  h+='<div class="ex-nav"><button onclick="exI=Math.max(0,exI-1);renderPractice()"'+(exI?'':' disabled')+'>← Previous</button>'+
+     '<button onclick="showInExplainer()">Show me how</button>'+
+     '<button class="primary" onclick="exI=Math.min(EXERCISES.length-1,exI+1);renderPractice()"'+(exI<EXERCISES.length-1?'':' disabled')+'>Next exercise →</button></div>';
+  const done=Object.values(exDone).filter(x=>x.solve).length;
+  h+='<p class="hint" style="text-align:center">Exercises solved: '+done+' of '+EXERCISES.length+'</p>';
+  el.innerHTML=h;
+  customElements.whenDefined('math-field').then(()=>{
+    if(canFactor){const a=mkBox('ansA','Brackets');const ra=document.getElementById('rowA');ra.append(a,kbButton(()=>a));
+      a.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();checkA()}});
+      if(st.fact){a.value=st.factLatex;a.readOnly=true;a.classList.add('good');say(document.getElementById('msgA'),true,'✓ Correct!')}}
+    const rb=document.getElementById('rowB'),boxes=[];
+    ['x =','x ='].forEach((t,k)=>{const l=document.createElement('span');l.className='lbl';l.textContent=t;const bx=mkBox('ansB'+k,'Solution '+(k+1));boxes.push(bx);rb.append(l,bx);
+      bx.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();checkB()}})});
+    let last=boxes[0];boxes.forEach(bx=>bx.addEventListener('focusin',()=>{last=bx}));
+    rb.append(kbButton(()=>last));
+    if(st.solve){boxes.forEach((bx,k)=>{bx.value=st.solveLatex[k];bx.readOnly=true;bx.classList.add('good')});say(document.getElementById('msgB'),true,'✓ Solved!')}
+    if(canFactor&&!st.fact)boxes.forEach(bx=>{bx.readOnly=true});
+  });
+}
+function checkA(){
+  const e=EXERCISES[exI],st=exDone[exI],box=document.getElementById('ansA');
+  const [ok,msg]=checkBrackets(box.value,e);
+  box.classList.toggle('good',ok);box.classList.toggle('bad',!ok);
+  say(document.getElementById('msgA'),ok,msg);
+  if(ok){st.fact=true;st.factLatex=box.value;box.readOnly=true;
+    document.getElementById('partB').classList.remove('locked');
+    document.querySelectorAll('#rowB math-field').forEach(bx=>{bx.readOnly=false});
+    setTimeout(()=>document.getElementById('ansB0').focus(),300)}
+}
+function hintA(){
+  const e=EXERCISES[exI],ac=e.a*e.c;
+  say(document.getElementById('msgA'),false,e.a===1
+    ?'Find two numbers that multiply to '+fmtN(e.c)+' and add to '+fmtN(e.b)+'. Then the brackets are (x + one number)(x + the other).'
+    :'Find two numbers that multiply to a × c = '+fmtN(ac)+' and add to '+fmtN(e.b)+'. Split the middle term with them, then use the grid (press Show me how).');
+  document.getElementById('msgA').firstChild.className='msg info';
+}
+function checkB(){
+  const e=EXERCISES[exI],st=exDone[exI];
+  if(factorises(e)&&!st.fact){say(document.getElementById('msgB'),false,'Factorise first (part 1).');return}
+  const boxes=[...document.querySelectorAll('#rowB math-field')];
+  const r=AnswerChecker.check(boxes.map(b=>b.value),{roots:exSolutions(e)},'solution_set',0.01);
+  boxes.forEach(b=>{b.classList.toggle('good',r.correct);b.classList.toggle('bad',!r.correct&&!r.nearly)});
+  say(document.getElementById('msgB'),r.correct,r.correct?'✓ Solved! Well done.':r.message);
+  if(r.correct){st.solve=true;st.solveLatex=boxes.map(b=>b.value);boxes.forEach(b=>{b.readOnly=true});
+    document.querySelectorAll('.ex-dot')[exI].classList.add('done');
+    const done=Object.values(exDone).filter(x=>x.solve).length;
+    document.querySelector('#pracPanel > .hint:last-child').textContent='Exercises solved: '+done+' of '+EXERCISES.length;}
+}
+function hintB(){
+  const e=EXERCISES[exI];
+  say(document.getElementById('msgB'),false,factorises(e)
+    ?'Make each bracket equal to 0 and solve it. For (x + 3) = 0, x = −3. For (2x + 1) = 0, x = −1/2.'
+    :'Use x = (−b ± √(b² − 4ac)) / 2a with a = '+e.a+', b = '+e.b+', c = '+e.c+'. Work it out once with + and once with −.');
+  document.getElementById('msgB').firstChild.className='msg info';
+}
+function showInExplainer(){
+  const e=EXERCISES[exI];
+  document.getElementById('ia').value=e.a;document.getElementById('ib').value=e.b;document.getElementById('ic').value=e.c;
+  setMode(factorises(e)?'fact':'form');fromInputs();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* ---------- draw everything ---------- */
